@@ -1,0 +1,150 @@
+import java.util.InputMismatchException;
+import java.util.Scanner;
+
+public class CalculadoraCalorias {
+	
+
+	    // --- Códigos de Cores ANSI para o Console ---
+	    // (Funcionam na maioria dos terminais modernos como VSCode, Linux, macOS e Windows Terminal)
+	    public static final String ANSI_RESET = "\u001B[0m";
+	    public static final String ANSI_RED = "\u001B[31m";
+	    public static final String ANSI_GREEN = "\u001B[32m";
+	    public static final String ANSI_YELLOW = "\u001B[33m";
+	    public static final String ANSI_BLUE = "\u001B[34m";
+	    public static final String ANSI_CYAN = "\u001B[36m";
+	    public static final String ANSI_BOLD = "\u001B[1m";
+
+	    public static void main(String[] args) {
+	    	
+	        Scanner input = new Scanner(System.in);
+
+	        System.out.println(ANSI_CYAN + ANSI_BOLD + "---- Bem-vindo à Calculadora de Calorias! ----" + ANSI_RESET);
+	        System.out.println("Vamos começar com algumas informações suas:");
+
+	        // --- Coleta de Dados com Validação ---
+	        int idade = lerInteiro(input, ANSI_YELLOW + "Sua idade: " + ANSI_RESET, 10, 100);
+	        double peso = lerDouble(input, ANSI_YELLOW + "Seu peso (em kg): " + ANSI_RESET, 30.0, 300.0);
+	        double altura = lerDouble(input, ANSI_YELLOW + "Sua altura (em cm): " + ANSI_RESET, 100.0, 250.0);
+	        char genero = lerGenero(input);
+
+	        // --- Cálculo da Taxa Metabólica Basal (TMB) - Fórmula Corrigida ---
+	        double tmb;
+	        if (genero == 'M') {
+	            // Fórmula de Harris-Benedict para homens (CORRIGIDA)
+	            tmb = 66 + (13.7 * peso) + (5 * altura) - (6.8 * idade);
+	        } else {
+	            // Fórmula de Harris-Benedict para mulheres (CORRIGIDA)
+	            tmb = 655 + (9.6 * peso) + (1.8 * altura) - (4.7 * idade);
+	        }
+
+	        // --- Nível de Atividade Física ---
+	        System.out.println("\n" + ANSI_BLUE + "Nível de atividade física:" + ANSI_RESET);
+	        System.out.println("1 - Sedentário (pouco ou nenhum exercício)");
+	        System.out.println("2 - Levemente ativo (exercício leve 1-3 dias/semana)");
+	        System.out.println("3 - Moderadamente ativo (exercício moderado 3-5 dias/semana)");
+	        System.out.println("4 - Muito ativo (exercício intenso 6-7 dias/semana)");
+	        int nivelAtividade = lerInteiro(input, "Escolha o nível (1 a 4): ", 1, 4);
+
+	        double fatorAtividade;
+	        switch (nivelAtividade) {
+	            case 1: fatorAtividade = 1.2; break;
+	            case 2: fatorAtividade = 1.375; break;
+	            case 3: fatorAtividade = 1.55; break;
+	            case 4: fatorAtividade = 1.725; break;
+	            default: fatorAtividade = 1.2; // Valor padrão
+	        }
+
+	        double gastoTotal = tmb * fatorAtividade;
+
+	        // --- Objetivo ---
+	        System.out.println("\n" + ANSI_BLUE + "Qual seu objetivo?" + ANSI_RESET);
+	        System.out.println("1 - Perder peso (déficit calórico)");
+	        System.out.println("2 - Manter peso");
+	        System.out.println("3 - Ganhar peso (superávit calórico)");
+	        int objetivo = lerInteiro(input, "Escolha seu objetivo (1 a 3): ", 1, 3);
+	        
+	        double caloriasRecomendadas;
+	        String objetivoDescricao = "";
+	        if (objetivo == 1) {
+	            caloriasRecomendadas = gastoTotal - 500;
+	            objetivoDescricao = "perder peso";
+	        } else if (objetivo == 3) {
+	            caloriasRecomendadas = gastoTotal + 500;
+	            objetivoDescricao = "ganhar peso";
+	        } else {
+	            caloriasRecomendadas = gastoTotal;
+	            objetivoDescricao = "manter seu peso";
+	        }
+
+	        // --- Exibição dos Resultados ---
+	        System.out.println("\n" + ANSI_CYAN + "------ SEU RESULTADO ------" + ANSI_RESET);
+	        System.out.printf("Sua Taxa Metabólica Basal (TMB) é de: " + ANSI_GREEN + "%.2f calorias" + ANSI_RESET + ".\n", tmb);
+	        System.out.printf("Seu gasto calórico diário total é de: " + ANSI_GREEN + "%.2f calorias" + ANSI_RESET + ".\n", gastoTotal);
+	        System.out.printf("Para " + objetivoDescricao + ", você deve consumir aproximadamente: " + ANSI_BOLD + ANSI_GREEN + "%.2f calorias por dia." + ANSI_RESET + "\n", caloriasRecomendadas);
+	        System.out.println("\n" + ANSI_YELLOW + "Lembre-se: este é um valor estimado. Consulte um profissional de saúde." + ANSI_RESET);
+
+	        input.close();
+	    }
+
+	    /**
+	     * Função auxiliar para ler um número inteiro do console com validação.
+	     */
+	    public static int lerInteiro(Scanner scanner, String mensagem, int min, int max) {
+	        int valor = 0;
+	        while (true) {
+	            try {
+	                System.out.print(mensagem);
+	                valor = scanner.nextInt();
+	                if (valor >= min && valor <= max) {
+	                    break; // Sai do loop se o valor for válido e dentro do intervalo
+	                } else {
+	                    System.out.println(ANSI_RED + "Erro: Por favor, insira um número entre " + min + " e " + max + "." + ANSI_RESET);
+	                }
+	            } catch (InputMismatchException e) {
+	                System.out.println(ANSI_RED + "Entrada inválida! Por favor, digite um número inteiro." + ANSI_RESET);
+	                scanner.next(); // Limpa o buffer do scanner para evitar loop infinito
+	            }
+	        }
+	        return valor;
+	    }
+
+	    /**
+	     * Função auxiliar para ler um número double (decimal) do console com validação.
+	     */
+	    public static double lerDouble(Scanner scanner, String mensagem, double min, double max) {
+	        double valor = 0.0;
+	        while (true) {
+	            try {
+	                System.out.print(mensagem);
+	                valor = scanner.nextDouble();
+	                if (valor >= min && valor <= max) {
+	                    break; // Sai do loop se o valor for válido e dentro do intervalo
+	                } else {
+	                    System.out.println(ANSI_RED + "Erro: Por favor, insira um número entre " + min + " e " + max + "." + ANSI_RESET);
+	                }
+	            } catch (InputMismatchException e) {
+	                System.out.println(ANSI_RED + "Entrada inválida! Por favor, digite um número (use vírgula para decimais)." + ANSI_RESET);
+	                scanner.next(); // Limpa o buffer
+	            }
+	        }
+	        return valor;
+	    }
+
+	    /**
+	     * Função auxiliar para ler e validar o gênero.
+	     */
+	    public static char lerGenero(Scanner scanner) {
+	        char genero;
+	        while (true) {
+	            System.out.print(ANSI_YELLOW + "Seu gênero (M para masculino ou F para feminino): " + ANSI_RESET);
+	            String entrada = scanner.next().toUpperCase();
+	            if (entrada.length() == 1 && (entrada.charAt(0) == 'M' || entrada.charAt(0) == 'F')) {
+	                genero = entrada.charAt(0);
+	                break;
+	            } else {
+	                System.out.println(ANSI_RED + "Entrada inválida! Digite apenas M ou F." + ANSI_RESET);
+	            }
+	        }
+	        return genero;
+	    }
+	}
